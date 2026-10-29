@@ -66,14 +66,21 @@ class RagEngine(private val context: Context) {
             hybrid = null
 
             // 1. Reuse a cached index when the version and source match.
-            runCatching {
+            // The embedder is still required to embed the *query*, so a cache
+            // hit must not short-circuit model setup.
+            val cached = runCatching {
                 indexStore.load(
                     docKey = docKey,
                     embedderId = OnnxEmbedder.MODEL_ID,
                     pageCount = pages.size,
                     sourceChars = sourceChars
                 )
-            }.getOrNull()?.let { cached ->
+            }.getOrNull()
+            if (cached != null) {
+                _state.value = State.Preparing(0.10f, "Loading cached index")
+                ensureEmbedder().getOrElse { error ->
+                    return@withLock fail(error.message ?: "Embedding model unavailable")
+                }
                 attach(cached)
                 _state.value = State.Ready(cached.stats)
                 return@withLock Result.success(cached)
@@ -92,24 +99,8 @@ class RagEngine(private val context: Context) {
             _state.value = State.Preparing(0.08f, "Split into ${chunks.size} chunks")
 
             // 3. Embedding model (downloaded once, then cached on disk).
-            val modelFile = modelStore.ensureDownloaded { fraction ->
-                val percent = (fraction * 100).toInt()
-                _state.value = State.Preparing(
-                    0.10f + fraction * 0.35f,
-                    if (fraction < 1f) "Downloading embedding model $percent%"
-                    else "Embedding model ready"
-                )
-            }.getOrElse { error ->
-                return@withLock fail(
-                    "Embedding model unavailable: ${error.message ?: "download failed"}"
-                )
-            }
-
-            val active = try {
-                embedder ?: OnnxEmbedder(modelStore.vocab, modelFile).also { embedder = it }
-            } catch (e: Throwable) {
-                Log.e(TAG, "Embedding model failed to load", e)
-                return@withLock fail("Could not start the embedding model: ${e.message}")
+            val active = ensureEmbedder().getOrElse { error ->
+                return@withLock fail(error.message ?: "Embedding model unavailable")
             }
 
             _state.value = State.Preparing(0.46f, "Loading embedding model")
@@ -195,6 +186,37 @@ class RagEngine(private val context: Context) {
     }
 
     fun stats(): IndexStats? = document?.stats
+
+    /** Creates (and downloads, if needed) the embedding session once. */
+    private suspend fun ensureEmbedder(): Result<Embedder> {
+        embedder?.let { return Result.success(it) }
+
+        val modelFile = modelStore.ensureDownloaded { fraction ->
+            val percent = (fraction * 100).toInt()
+            _state.value = State.Preparing(
+                0.10f + fraction * 0.35f,
+                if (fraction < 1f) "Downloading embedding model $percent%"
+                else "Embedding model ready"
+            )
+        }.getOrElse { error ->
+            return Result.failure(
+                IllegalStateException(
+                    "Embedding model unavailable: ${error.message ?: "download failed"}"
+                )
+            )
+        }
+
+        return try {
+            val created = OnnxEmbedder(modelStore.vocab, modelFile)
+            embedder = created
+            Result.success(created)
+        } catch (t: Throwable) {
+            Log.e(TAG, "Embedding model failed to load", t)
+            Result.failure(
+                IllegalStateException("Could not start the embedding model: ${t.message}")
+            )
+        }
+    }
 
     private fun attach(indexed: IndexedDocument) {
         document = indexed

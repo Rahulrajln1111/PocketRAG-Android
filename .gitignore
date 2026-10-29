@@ -1,0 +1,23 @@
+# Android
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/app/build
+/captures
+.externalNativeBuild
+.cxx
+
+# Native build artefacts
+/build/llama.cpp
+
+# Model files
+*.gguf
+*.onnx
+*.onnx.part
+
+# Misc
+*.log
+*.tmp

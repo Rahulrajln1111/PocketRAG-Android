@@ -115,8 +115,9 @@ dependencies {
     // DataStore for preferences
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
-    // On-device text embeddings (ONNX Runtime)
-    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.20.0")
+    // On-device text embeddings (ONNX Runtime). 1.22+ ships 16 KB-aligned
+    // native libraries, required for Android 15 devices with 16 KB pages.
+    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.22.0")
 
     // Unit tests (JVM, no device needed)
     testImplementation("junit:junit:4.13.2")

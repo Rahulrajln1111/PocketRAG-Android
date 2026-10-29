@@ -68,6 +68,15 @@ target_link_libraries(llama_bridge
         log                             # Android logging
 )
 
+# Android 15+ devices can use 16 KB memory pages. With the default
+# android:extractNativeLibs="false" the loader maps the .so directly from the
+# APK, so every LOAD segment must be 16 KB-aligned or the library fails to
+# load. NDK r25 still defaults to 4 KB, hence the explicit flags.
+target_link_options(llama_bridge PRIVATE
+    -Wl,-z,max-page-size=16384
+    -Wl,-z,common-page-size=16384
+)
+
 # Export the model data-dir path so the bridge knows where the GGUF file lives
 target_compile_definitions(llama_bridge PRIVATE
     MODEL_DIR="/data/data/com.pdfapk/files/models"

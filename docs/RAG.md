@@ -183,10 +183,10 @@ mixing two embedding spaces degrades retrieval with no visible error.
 
 ## Measured behaviour
 
-Unit tests (JVM, no device): `./gradlew :app:testDebugUnitTest` — 36 tests
-covering cleaning, chunking, WordPiece, BM25, IVF recall against brute force,
-save/load round-trip, RRF fusion, page diversity, the relevance floor, prompt
-budgets and summary coverage.
+Unit tests (JVM, no device): `./gradlew :app:testDebugUnitTest` — 43 tests
+covering cleaning, chunking, WordPiece *fidelity against HuggingFace reference
+ids*, BM25, IVF recall against brute force, save/load round-trip, RRF fusion,
+page diversity, the relevance floor, prompt budgets and summary coverage.
 
 Not measured yet, and therefore not claimed: on-device indexing time per page,
 end-to-end answer quality, and recall on a labelled question set. The harness
@@ -205,6 +205,15 @@ To make claims about retrieval quality, build the set first:
    latency and time-to-first-token.
 
 The unit tests prove the machinery; only this set can prove the retrieval.
+
+Model contract verified offline against the shipped ONNX file: three int64
+inputs (`input_ids`, `attention_mask`, `token_type_ids`) and one float output
+`last_hidden_state` of shape `(batch, seq, 384)`. Cosine on the desktop runtime:
+the correct passage scores 0.57 where unrelated passages score ~0.19, which is
+what puts the 0.28 floor between "relevant" and "not relevant".
+
+Native libraries are 16 KB-aligned (verified with `zipalign -c -P 16`), so the
+APK loads on Android 15 devices configured with 16 KB memory pages.
 
 ## Known limitations
 

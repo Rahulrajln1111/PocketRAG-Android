@@ -148,7 +148,7 @@ is in **[docs/RAG.md](docs/RAG.md)**.
 |-----------|---------|
 | **llama.cpp** (NDK/JNI) | Run Qwen 2.5 1.5B on-device via C++ native code |
 | **Groq Cloud API** | Cloud inference with Llama 3 70B / 8B (fast GPU) |
-| **ONNX Runtime Android** `1.20.0` | On-device inference for the embedding model |
+| **ONNX Runtime Android** `1.22.0` | On-device inference for the embedding model (16 KB-aligned native libs) |
 | **all-MiniLM-L6-v2** (int8 ONNX, 23 MB) | 384-dim sentence embeddings for retrieval |
 | **IVF index + BM25** (in-repo, Kotlin) | Vector search and keyword search, fused with RRF |
 | `okhttp:4.12.0` | HTTP client for Groq API + model/embedder downloads |

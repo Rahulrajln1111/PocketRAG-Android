@@ -278,7 +278,7 @@ fun SettingsScreen(
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("PDF Apk v1.0.0", style = MaterialTheme.typography.titleSmall)
+                    Text("PocketRAG v1.0.0", style = MaterialTheme.typography.titleSmall)
                     Text(
                         "Built with ❤️ using Jetpack Compose, llama.cpp, Groq Cloud, and Qwen 2.5",
                         style = MaterialTheme.typography.bodySmall,

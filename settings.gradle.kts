@@ -21,5 +21,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "PDFApk"
+rootProject.name = "PocketRAG"
 include(":app")

@@ -83,7 +83,7 @@ fun HomeScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "PDF Apk",
+                        text = "PocketRAG",
                         fontWeight = FontWeight.Bold
                     )
                 },
@@ -129,7 +129,7 @@ fun HomeScreen(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = "PDF AI Assistant",
+                        text = "On-Device PDF RAG",
                         style = MaterialTheme.typography.headlineLarge,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Bold

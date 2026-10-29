@@ -21,3 +21,4 @@
 # Misc
 *.log
 *.tmp
+/.kotlin
